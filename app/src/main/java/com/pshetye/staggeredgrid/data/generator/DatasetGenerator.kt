@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 object DatasetGenerator {
 
-    const val DEFAULT_DATASET_SIZE = 100
+    const val DEFAULT_DATASET_SIZE = 1000
 
     private val titles = listOf(
         "Sunset Horizon", "Morning Brew", "Deep Focus", "Cloud Atlas", "Iron Forge",
