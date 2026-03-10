@@ -1,6 +1,7 @@
 package com.pshetye.staggeredgrid.data.repository
 
 import com.pshetye.staggeredgrid.data.generator.DatasetGenerator
+import com.pshetye.staggeredgrid.data.generator.SegmentOptimizer
 import com.pshetye.staggeredgrid.data.model.GridItem
 import kotlinx.coroutines.delay
 import kotlin.random.Random
@@ -12,7 +13,7 @@ enum class NetworkSpeed(val label: String, val delayRange: LongRange) {
 
 class GridItemRepository {
 
-    private val dataset: List<GridItem> = DatasetGenerator.generate()
+    private val dataset: List<GridItem> = SegmentOptimizer.optimize(DatasetGenerator.generate())
 
     val totalItems: Int get() = dataset.size
 
