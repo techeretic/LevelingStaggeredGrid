@@ -61,12 +61,21 @@ object DatasetGenerator {
                 .map { sentences[random.nextInt(sentences.size)] }
                 .joinToString(" ")
 
+            val r = 0.55f + 0.35f * random.nextFloat()
+            val g = 0.55f + 0.35f * random.nextFloat()
+            val b = 0.55f + 0.35f * random.nextFloat()
+            val argb = (0xFF shl 24) or
+                ((r * 255).toInt() shl 16) or
+                ((g * 255).toInt() shl 8) or
+                (b * 255).toInt()
+
             GridItem(
                 id = "item_$index",
                 title = titles[random.nextInt(titles.size)],
                 icon = icons[random.nextInt(icons.size)],
                 description = description,
-                spanType = spanType
+                spanType = spanType,
+                color = argb.toLong() and 0xFFFFFFFFL
             )
         }
     }
