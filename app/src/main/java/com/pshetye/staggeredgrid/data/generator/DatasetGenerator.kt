@@ -24,13 +24,20 @@ object DatasetGenerator {
 
     fun generate(count: Int = DEFAULT_DATASET_SIZE, seed: Long = 42L): List<GridItem> {
         val random = Random(seed)
+        var singleSinceLastFull = 5
         return (1..count).map { index ->
+            val spanType = if (singleSinceLastFull < 5 || random.nextFloat() >= 0.3f) {
+                SpanType.SINGLE
+            } else {
+                SpanType.FULL
+            }
+            singleSinceLastFull = if (spanType == SpanType.FULL) 0 else singleSinceLastFull + 1
             GridItem(
                 id = "item_$index",
                 title = titles[random.nextInt(titles.size)],
                 icon = icons[random.nextInt(icons.size)],
-                heightDp = random.nextInt(40, 151),
-                spanType = if (random.nextFloat() < 0.3f) SpanType.FULL else SpanType.SINGLE
+                heightDp = random.nextInt(120, 301),
+                spanType = spanType
             )
         }
     }
