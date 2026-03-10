@@ -26,7 +26,7 @@ Demonstrates how to minimise visual gaps in a `LazyVerticalStaggeredGrid` that m
 ## Architecture
 
 **Pattern:** MVVM — `GridViewModel` (StateFlow) → `StaggeredGridScreen` (Compose)
-**Data flow:** `DatasetGenerator` → `GridItemRepository.loadPage()` → `SegmentOptimizer.optimize()` → ViewModel state → UI
+**Data flow:** `DatasetGenerator` → `GridItemRepository.loadPage()` → `StaggeredGridLeveler.optimize()` → ViewModel state → UI
 **Pagination:** 20 items/page, triggered when the last visible index is within 5 of the list end.
 
 ## Key Files
@@ -35,29 +35,34 @@ Demonstrates how to minimise visual gaps in a `LazyVerticalStaggeredGrid` that m
 |---|---|
 | `data/model/GridItem.kt` | `GridItem(id, title, icon, description, spanType, color)` + `SpanType(SINGLE, FULL)` |
 | `data/generator/DatasetGenerator.kt` | Seeded 1000-item generator; ~30% FULL, min 5 SINGLE between each FULL; assigns randomized pastel background color per item |
-| `data/generator/SegmentOptimizer.kt` | Reorders SINGLE items between FULL boundaries to minimise column height gap |
-| `data/repository/GridItemRepository.kt` | Loads raw pages, optimises them with current measured heights + column context |
-| `ui/viewmodel/GridViewModel.kt` | Tracks `measuredHeights`, simulates column state, feeds context to repository |
+| `leveling/StaggeredGridLeveler.kt` | Generic reusable optimizer — works with any item type `T` via `keySelector`, `isFullSpan`, `estimateHeight` lambdas |
+| `data/repository/GridItemRepository.kt` | Loads raw pages, delegates to `StaggeredGridLeveler` for optimization |
+| `ui/viewmodel/GridViewModel.kt` | Creates `StaggeredGridLeveler<GridItem>`, tracks `measuredHeights`, feeds context to repository |
 | `ui/components/GridItemCard.kt` | Reports actual rendered height via `onHeightMeasured` callback; uses `item.color` for card background |
 | `ui/screen/StaggeredGridScreen.kt` | 2-column `LazyVerticalStaggeredGrid`, wires height callbacks, 4dp vertical spacing |
 
-## Gap-Reduction Algorithm (SegmentOptimizer)
+## Gap-Reduction Algorithm (StaggeredGridLeveler)
 
-Items between each pair of FULL-span boundaries form a *segment*. Within each segment `SegmentOptimizer`:
+`StaggeredGridLeveler<T>` is a **generic API** that works with any item type. It takes three lambdas:
+- `keySelector: (T) -> String` — unique ID for measured-height lookup
+- `isFullSpan: (T) -> Boolean` — identifies full-span items (segment boundaries)
+- `estimateHeight: (T) -> Int` — content-based height estimate when no measurement exists
 
-1. **Estimates height** from description text length: `BASE_HEIGHT(88) + LINE_HEIGHT(16) × ceil(chars / 23)`. Uses a measured actual height from the UI if one is available for that item.
+Items between each pair of full-span boundaries form a *segment*. Within each segment:
+
+1. **Resolves height** via `resolveHeight()`: uses measured actual height if available, otherwise the `estimateHeight` lambda. For this app: `BASE_HEIGHT(88) + LINE_HEIGHT(16) × ceil(chars / 23)`.
 2. **Initial order:** Sort descending by height (LPT heuristic — strong for 2-machine scheduling).
 3. **Hill-climbing:** Try all pairwise swaps; keep any that reduce the score.
-4. **Score = final `|colA − colB|` only** — the gap that actually appears before the next FULL item. The previous implementation used a cumulative imbalance score (wrong metric).
-5. **Starting heights propagated:** Each segment starts with the column heights left by the previous segment, not assumed-zero. FULL items level both columns (`max(colA, colB) + fullH`).
+4. **Score = final `|colA − colB|` only** — the gap that actually appears before the next FULL item.
+5. **Starting heights propagated:** Each segment starts with the column heights left by the previous segment, not assumed-zero. Full-span items level both columns (`max(colA, colB) + fullH`).
 
 ### Cross-page awareness
-`GridViewModel.computeColumnHeights()` simulates the greedy assignment over all loaded items (using measured heights where available), then passes `(startColA, startColB)` to `GridItemRepository.loadPage()` for each new page.
+`StaggeredGridLeveler.computeColumnHeights()` simulates the greedy assignment over all loaded items (handling both single-span and full-span items), then the ViewModel passes `(startColA, startColB)` to `GridItemRepository.loadPage()` for each new page.
 
 ## Conventions
 
 - No explicit `heightDp` on data models — text content length is the sole height driver.
-- `measuredHeights: Map<String, Int>` flows: `GridItemCard.onSizeChanged` → `GridViewModel.onItemHeightMeasured` → `GridItemRepository.loadPage` → `SegmentOptimizer.optimize`.
+- `measuredHeights: Map<String, Int>` flows: `GridItemCard.onSizeChanged` → `GridViewModel.onItemHeightMeasured` → `GridItemRepository.loadPage` → `StaggeredGridLeveler.optimize`.
 - Already-rendered items are **never** reordered (would cause jarring visual jumps).
 - `verticalItemSpacing = 4.dp` (reduced from 8dp to lower the minimum forced gap).
 

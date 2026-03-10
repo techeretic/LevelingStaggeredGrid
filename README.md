@@ -14,11 +14,21 @@ FULL item:              ↑ gap appears here
 
 The gap size equals `|colA_height − colB_height|`. The only lever available is the **ordering** of SINGLE-span items within each segment (between consecutive FULL items).
 
-## Solution: SegmentOptimizer
+## Solution: StaggeredGridLeveler
 
-Since items carry no explicit height field, card height is driven entirely by **description text length** — a text-as-height proxy. The `SegmentOptimizer` uses this to find a near-optimal ordering:
+`StaggeredGridLeveler<T>` is a **generic, reusable API** that can be applied to any `LazyVerticalStaggeredGrid` to eliminate column-height gaps — regardless of what the items look like. The caller teaches the leveler about their items via three lambdas:
 
-1. **Segment** — Split items at each FULL-span boundary; FULL items are never reordered.
+```kotlin
+val leveler = StaggeredGridLeveler<MyItem>(
+    keySelector    = { it.id },
+    isFullSpan     = { it.spanType == FULL },
+    estimateHeight = { BASE_HEIGHT + LINE_HEIGHT * ceil(it.text.length / CPL) }
+)
+```
+
+The leveler then finds a near-optimal ordering within each segment (items between consecutive full-span boundaries):
+
+1. **Segment** — Split items at each full-span boundary; full-span items are never reordered.
 2. **LPT initial order** — Sort descending by estimated height (Longest Processing Time first, a classical 2-machine scheduling heuristic).
 3. **Hill-climbing** — Try all pairwise swaps; accept any that reduce the gap score.
 4. **Score = final `|colA − colB|` only** — targets the actual visible gap, not cumulative raggedness.
@@ -34,7 +44,8 @@ Before loading each page, `GridViewModel` simulates the greedy column assignment
 
 ## Features
 
-- **Gap-minimising layout** — `SegmentOptimizer` reorders items to reduce column height imbalance at each full-span boundary
+- **Generic leveling API** — `StaggeredGridLeveler<T>` works with any item type and any `LazyVerticalStaggeredGrid`
+- **Gap-minimising layout** — reorders items to reduce column height imbalance at each full-span boundary
 - **Text-as-height proxy** — no `heightDp` field; card height is determined by description text length
 - **Measured height feedback** — actual rendered heights improve optimisation for subsequent pages
 - **Cross-page column awareness** — optimizer receives current column state before each page load
@@ -55,19 +66,20 @@ Before loading each page, `GridViewModel` simulates the greedy column assignment
 
 ```
 com.pshetye.staggeredgrid/
+├── leveling/
+│   └── StaggeredGridLeveler.kt             # Generic reusable API — works with any item type T
 ├── data/
 │   ├── model/GridItem.kt                   # GridItem data class + SpanType(SINGLE, FULL) + color
 │   ├── generator/
-│   │   ├── DatasetGenerator.kt             # Seeded 1000-item generator (~30% FULL span, randomized pastel colors)
-│   │   └── SegmentOptimizer.kt             # Column-balancing reorder algorithm
-│   └── repository/GridItemRepository.kt   # Per-page load + optimization with height context
+│   │   └── DatasetGenerator.kt             # Seeded 1000-item generator (~30% FULL span, randomized pastel colors)
+│   └── repository/GridItemRepository.kt   # Per-page load + delegates to StaggeredGridLeveler
 ├── ui/
 │   ├── theme/                              # Material 3 colour + typography
 │   ├── components/
 │   │   ├── GridItemCard.kt                 # Card UI + height measurement callback
 │   │   └── NetworkSpeedControls.kt         # Speed toggle + load time display
 │   ├── screen/StaggeredGridScreen.kt       # Main 2-column staggered grid screen
-│   └── viewmodel/GridViewModel.kt          # State, height tracking, column simulation
+│   └── viewmodel/GridViewModel.kt          # Creates leveler, manages state + measured heights
 └── MainActivity.kt
 ```
 
