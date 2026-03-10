@@ -40,6 +40,7 @@ Before loading each page, `GridViewModel` simulates the greedy column assignment
 - **Cross-page column awareness** — optimizer receives current column state before each page load
 - **Paginated loading** — 20 items per page, auto-triggered near the scroll end
 - **Simulated network delay** — toggle between Fast (200–500ms) and Slow (2–4s) to observe loading behaviour
+- **Randomized pastel card colors** — each item carries a unique background color, generated as part of the dataset
 - **Reproducible dataset** — seeded randomisation produces the same 1000 items every run
 - **Item animations** — smooth fade+slide via `Modifier.animateItem()`
 
@@ -55,9 +56,9 @@ Before loading each page, `GridViewModel` simulates the greedy column assignment
 ```
 com.pshetye.staggeredgrid/
 ├── data/
-│   ├── model/GridItem.kt                   # GridItem data class + SpanType(SINGLE, FULL)
+│   ├── model/GridItem.kt                   # GridItem data class + SpanType(SINGLE, FULL) + color
 │   ├── generator/
-│   │   ├── DatasetGenerator.kt             # Seeded 1000-item generator (~30% FULL span)
+│   │   ├── DatasetGenerator.kt             # Seeded 1000-item generator (~30% FULL span, randomized pastel colors)
 │   │   └── SegmentOptimizer.kt             # Column-balancing reorder algorithm
 │   └── repository/GridItemRepository.kt   # Per-page load + optimization with height context
 ├── ui/
@@ -76,9 +77,8 @@ com.pshetye.staggeredgrid/
 
 The Gradle build daemon requires JDK 21 (the system JDK 25.0.2 is incompatible with Gradle 8.11.1's Kotlin DSL compiler). JDK 21 is pinned via `gradle.properties` and is expected at:
 ```
-/opt/homebrew/opt/openjdk@21
+/Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home
 ```
-Install with: `brew install openjdk@21`
 
 ### CLI Build
 

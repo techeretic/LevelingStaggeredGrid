@@ -4,8 +4,8 @@
 Android Jetpack Compose app demonstrating LazyVerticalStaggeredGrid with 2 columns, mixed SINGLE/FULL span items, and paginated loading (20 items/page from 1000-item dataset).
 
 ## Key Files
-- `data/model/GridItem.kt` — `GridItem(id, title, icon, description, spanType)` + `SpanType(SINGLE, FULL)`
-- `data/generator/DatasetGenerator.kt` — seeded 1000-item generator; ~30% FULL span, min 5 SINGLE between FULL
+- `data/model/GridItem.kt` — `GridItem(id, title, icon, description, spanType, color)` + `SpanType(SINGLE, FULL)`
+- `data/generator/DatasetGenerator.kt` — seeded 1000-item generator; ~30% FULL span, min 5 SINGLE between FULL; generates randomized pastel background color per item
 - `data/generator/SegmentOptimizer.kt` — reorders SINGLE items between FULL boundaries to minimize column gaps
 - `data/repository/GridItemRepository.kt` — per-page optimization with measured heights + starting column heights
 - `ui/viewmodel/GridViewModel.kt` — tracks `measuredHeights`, computes column state for cross-page context
@@ -29,6 +29,6 @@ Key fixes applied:
 
 ## Build Environment
 System JDK is 25.0.2 (incompatible with Gradle 8.11.1's Kotlin DSL compiler).
-**Fix:** `gradle.properties` sets `org.gradle.java.home=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home`
-JDK 21 is at `/opt/homebrew/opt/openjdk@21`. Build works fine with this setting.
+**Fix:** `gradle.properties` sets `org.gradle.java.home=/Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home`
+JDK 21 is Azul Zulu 21.46.19 at `/Library/Java/JavaVirtualMachines/zulu-21.jdk`. Build works fine with this setting.
 Build commands: `./gradlew :app:assembleDebug` then `adb install -r app/build/outputs/apk/debug/app-debug.apk`

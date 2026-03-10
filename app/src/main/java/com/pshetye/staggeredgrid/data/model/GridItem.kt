@@ -5,7 +5,8 @@ data class GridItem(
     val title: String,
     val icon: String,
     val description: String,
-    val spanType: SpanType
+    val spanType: SpanType,
+    val color: Long
 )
 
 enum class SpanType {

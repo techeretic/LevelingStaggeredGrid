@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -44,11 +45,7 @@ fun GridItemCard(
     onHeightMeasured: ((itemId: String, heightDp: Int) -> Unit)? = null
 ) {
     val isFullSpan = item.spanType == SpanType.FULL
-    val containerColor = if (isFullSpan) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
+    val containerColor = Color(item.color.toULong() shl 32)
     val elevation = if (isFullSpan) 3.dp else 1.dp
     val density = LocalDensity.current
 
@@ -68,7 +65,7 @@ fun GridItemCard(
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
                 text = item.id,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -81,14 +78,14 @@ fun GridItemCard(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = item.title,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleLarge,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = item.description,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

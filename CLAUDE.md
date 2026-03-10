@@ -7,7 +7,7 @@ This file gives Claude context about the project conventions, build setup, and a
 **System JDK:** 25.0.2 (incompatible with Gradle 8.11.1's embedded Kotlin DSL compiler)
 **Fix in place:** `gradle.properties` sets `org.gradle.java.home` to the Homebrew-installed JDK 21:
 ```
-org.gradle.java.home=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+org.gradle.java.home=/Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home
 ```
 Always use `./gradlew` — never `gradle` directly. The wrapper resolves the right Gradle version.
 
@@ -33,12 +33,12 @@ Demonstrates how to minimise visual gaps in a `LazyVerticalStaggeredGrid` that m
 
 | File | Role |
 |---|---|
-| `data/model/GridItem.kt` | `GridItem(id, title, icon, description, spanType)` + `SpanType(SINGLE, FULL)` |
-| `data/generator/DatasetGenerator.kt` | Seeded 1000-item generator; ~30% FULL, min 5 SINGLE between each FULL |
+| `data/model/GridItem.kt` | `GridItem(id, title, icon, description, spanType, color)` + `SpanType(SINGLE, FULL)` |
+| `data/generator/DatasetGenerator.kt` | Seeded 1000-item generator; ~30% FULL, min 5 SINGLE between each FULL; assigns randomized pastel background color per item |
 | `data/generator/SegmentOptimizer.kt` | Reorders SINGLE items between FULL boundaries to minimise column height gap |
 | `data/repository/GridItemRepository.kt` | Loads raw pages, optimises them with current measured heights + column context |
 | `ui/viewmodel/GridViewModel.kt` | Tracks `measuredHeights`, simulates column state, feeds context to repository |
-| `ui/components/GridItemCard.kt` | Reports actual rendered height via `onHeightMeasured` callback |
+| `ui/components/GridItemCard.kt` | Reports actual rendered height via `onHeightMeasured` callback; uses `item.color` for card background |
 | `ui/screen/StaggeredGridScreen.kt` | 2-column `LazyVerticalStaggeredGrid`, wires height callbacks, 4dp vertical spacing |
 
 ## Gap-Reduction Algorithm (SegmentOptimizer)
