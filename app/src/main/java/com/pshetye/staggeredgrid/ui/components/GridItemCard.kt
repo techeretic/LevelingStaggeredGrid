@@ -30,6 +30,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pshetye.staggeredgrid.data.model.GridItem
@@ -38,7 +40,8 @@ import com.pshetye.staggeredgrid.data.model.SpanType
 @Composable
 fun GridItemCard(
     item: GridItem,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onHeightMeasured: ((itemId: String, heightDp: Int) -> Unit)? = null
 ) {
     val isFullSpan = item.spanType == SpanType.FULL
     val containerColor = if (isFullSpan) {
@@ -47,9 +50,17 @@ fun GridItemCard(
         MaterialTheme.colorScheme.surfaceVariant
     }
     val elevation = if (isFullSpan) 3.dp else 1.dp
+    val density = LocalDensity.current
 
     Card(
-        modifier = modifier.height(item.heightDp.dp),
+        modifier = modifier.then(
+            if (onHeightMeasured != null) {
+                Modifier.onSizeChanged { size ->
+                    val heightDp = with(density) { size.height.toDp().value.toInt() }
+                    onHeightMeasured(item.id, heightDp)
+                }
+            } else Modifier
+        ),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation)
@@ -73,6 +84,12 @@ fun GridItemCard(
                 style = MaterialTheme.typography.titleSmall,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = item.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
