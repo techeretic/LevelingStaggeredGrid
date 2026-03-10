@@ -22,6 +22,29 @@ object DatasetGenerator {
         "Anchor", "LocalFireDepartment", "AutoAwesome", "Explore", "Spa"
     )
 
+    private val sentences = listOf(
+        "A warm glow spreads across the evening sky.",
+        "The sound of waves fills the air with calm.",
+        "Patterns emerge from the chaos of data.",
+        "Tiny crystals form along the frozen edge.",
+        "Light bends through the prism of thought.",
+        "Roots dig deep beneath ancient stones.",
+        "Signals travel faster than the eye can see.",
+        "Colors shift as the temperature changes.",
+        "The compass points toward unexplored terrain.",
+        "Embers rise gently into the night above.",
+        "A quiet hum resonates through the chamber.",
+        "Layers of sediment reveal hidden stories.",
+        "The algorithm converges on a stable solution.",
+        "Starlight reflects off the surface of still water.",
+        "Wind carries seeds across vast open plains.",
+        "Pressure builds beneath the volcanic ridge.",
+        "A single thread connects distant memories.",
+        "The tide pulls back to reveal the shore.",
+        "Frost patterns trace delicate lines on glass.",
+        "Energy flows through the network of paths."
+    )
+
     fun generate(count: Int = DEFAULT_DATASET_SIZE, seed: Long = 42L): List<GridItem> {
         val random = Random(seed)
         var singleSinceLastFull = 5
@@ -32,11 +55,17 @@ object DatasetGenerator {
                 SpanType.FULL
             }
             singleSinceLastFull = if (spanType == SpanType.FULL) 0 else singleSinceLastFull + 1
+
+            val sentenceCount = random.nextInt(1, 6)
+            val description = (1..sentenceCount)
+                .map { sentences[random.nextInt(sentences.size)] }
+                .joinToString(" ")
+
             GridItem(
                 id = "item_$index",
                 title = titles[random.nextInt(titles.size)],
                 icon = icons[random.nextInt(icons.size)],
-                heightDp = random.nextInt(120, 301),
+                description = description,
                 spanType = spanType
             )
         }

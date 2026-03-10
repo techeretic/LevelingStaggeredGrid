@@ -68,7 +68,7 @@ fun StaggeredGridScreen(
             state = gridState,
             contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalItemSpacing = 8.dp,
+            verticalItemSpacing = 4.dp,
             modifier = Modifier.fillMaxSize()
         ) {
             items(
@@ -83,7 +83,8 @@ fun StaggeredGridScreen(
             ) { item ->
                 GridItemCard(
                     item = item,
-                    modifier = Modifier.animateItem()
+                    modifier = Modifier.animateItem(),
+                    onHeightMeasured = viewModel::onItemHeightMeasured
                 )
             }
 

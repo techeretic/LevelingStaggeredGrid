@@ -4,7 +4,7 @@ data class GridItem(
     val id: String,
     val title: String,
     val icon: String,
-    val heightDp: Int,
+    val description: String,
     val spanType: SpanType
 )
 
